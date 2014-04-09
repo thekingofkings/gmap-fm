@@ -19,13 +19,13 @@ body { height: 100%; margin: 0; padding: 0 }
 	margin-left: 60%;
 	z-index: 5;
 	background-color:#fff;
-	padding: 5px;
+	padding: 0px;
 	border: 1px solid #999;
 	width: 380px;
-	height: 47px;
+	height: 23px;
 }
 
-#line1, #line2 {
+#line {
 	margin: 0px;
 	height: 23px;
 }

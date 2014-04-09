@@ -61,7 +61,7 @@ function setOrg() {
 		orgRegion = null;
 	}
 	
-	message( 2, 'Please pinpoint the bottom left coner of origin region.' );
+	message( 'Please pinpoint the bottom left coner of origin region.' );
 }
 
 function setDst() {
@@ -74,7 +74,7 @@ function setDst() {
 		dstRegion = null;
 	}
 	
-	message( 2, 'Please pinpoint the bottom left coner of destination region.' );
+	message( 'Please pinpoint the bottom left coner of destination region.' );
 }
 	
 
@@ -86,14 +86,14 @@ function mouseClick(event) {
 		orgLatLngs.push( event.latLng );
 		addMarker( event.latLng );
 		drawOrgFlag = 1;
-		message( 2, 'Please pinpoint the top right coner of origin region.' );
+		message( 'Please pinpoint the top right coner of origin region.' );
 	}
 	else if (drawOrgFlag == 1)
 	{
 		orgLatLngs.push( event.latLng );
 		orgRegion = drawRegion( orgLatLngs );
 		drawOrgFlag = 2;
-		message( 2, orgRegion.getBounds().toString() );
+		message( "Origin selected." );
 	}
 	
 	// draw destination region
@@ -102,14 +102,14 @@ function mouseClick(event) {
 		dstLatLngs.push( event.latLng );
 		addMarker( event.latLng );
 		drawDstFlag = 1;
-		message( 2, 'Please pinpoint the top right coner of destination region.' );
+		message( 'Please pinpoint the top right coner of destination region.' );
 	}
 	else if (drawDstFlag == 1)
 	{
 		dstLatLngs.push( event.latLng );
 		dstRegion = drawRegion( dstLatLngs );
 		drawDstFlag = 2;
-		message( 2, dstRegion.getBounds().toString() );
+		message( "Destination selected." );
 	}
 }
 
@@ -202,9 +202,9 @@ function hideTrips()
 }
 
 
-function message( lineNo, content )
+function message( content )
 {
-	$('#line' + lineNo).html( content )
+	$('#line').html( content )
 }
 
 
@@ -217,11 +217,11 @@ function AJAXqueryTrips() {
 		dst: [	[dstLatLngs[0].A, dstLatLngs[0].k],
 					[dstLatLngs[1].A, dstLatLngs[1].k], 	]
 	};
-	message(2, "Query trips from server ... ");
+	message("Query trips from server ... ");
 	return $.getJSON( "qtrips", JSON.stringify(queryData), function( data ) {
 		testVar = data;
 		// data is JSON format object, representing the coordinates of each trip
-		message(2, '#gameday trip: ' + data.gd.length + '; #non-game day trip: '
+		message( '#gameday trip: ' + data.gd.length + '; #non-game day trip: '
 				+ data.ngd.length);
 		// create google map objects from the JSON coordinates 
 		mapTrips( data );
