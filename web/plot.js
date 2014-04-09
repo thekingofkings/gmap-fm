@@ -91,7 +91,7 @@ function mouseClick(event) {
 	else if (drawOrgFlag == 1)
 	{
 		orgLatLngs.push( event.latLng );
-		orgRegion = drawRegion( orgLatLngs );
+		orgRegion = drawRegion( orgLatLngs, "#008000" );
 		drawOrgFlag = 2;
 		message( "Origin selected." );
 	}
@@ -107,7 +107,7 @@ function mouseClick(event) {
 	else if (drawDstFlag == 1)
 	{
 		dstLatLngs.push( event.latLng );
-		dstRegion = drawRegion( dstLatLngs );
+		dstRegion = drawRegion( dstLatLngs, "#800000");
 		drawDstFlag = 2;
 		message( "Destination selected." );
 	}
@@ -124,14 +124,14 @@ function addMarker( point )
 }
 
 
-function drawRegion( latLngPair )
+function drawRegion( latLngPair, color )
 {
 	// clear marker
 	removeShownMarkers();
 	
 	var bbox = new google.maps.LatLngBounds( latLngPair[0], latLngPair[1] );
 	var rectangle = new google.maps.Rectangle( {
-		strokeColor: "#800000",
+		strokeColor: color,
 		strokeOpacity: 0.8,
 		strokeWeight: 2,
 		map: map,
@@ -144,28 +144,24 @@ function drawRegion( latLngPair )
 
 function plotTrips()
 {
-	var trips = [];
 	if ( isGameDay )
 	{
-		trips = gdtrips;
+		for (i = 0; i < gdtrips.length; i++)
+		{
+			// plot the trip on Maps
+			gdtrips[i].setMap( map );
+			shownTrips.push( gdtrips[i] );
+		}
 	}
 	else
 	{
-		trips = ngdtrips;
+		for (i = 0; i < ngdtrips.length; i++)
+		{
+			// plot the trip on Maps
+			ngdtrips[i].setMap( map );
+			shownTrips.push( ngdtrips[i] );
+		}
 	}
-	
-	cnt = 0;
-	for (i = 0; i < trips.length; i++)
-	{
-		var tripPath = trips[i];
-		// plot the trip on Maps
-		tripPath.setMap( map );
-		google.maps.event.addListener(tripPath, 'mouseover', showTripMarkers);
-		google.maps.event.addListener(tripPath, 'mouseout', removeShownMarkers);
-		shownTrips.push(tripPath);
-		cnt ++;
-	}
-	return cnt;
 }
 	
 	
@@ -254,6 +250,9 @@ function mapTrips( queryRes ) {
 			editable: true
 		});
 			
+		google.maps.event.addListener(tripPath, 'mouseover', showTripMarkers);
+		google.maps.event.addListener(tripPath, 'mouseout', removeShownMarkers);
+		
 		// save trips in global space.
 		gdtrips.push(tripPath);
 	}
@@ -276,6 +275,9 @@ function mapTrips( queryRes ) {
 			strokeWeight: 2,
 			editable: true
 		});
+		
+		google.maps.event.addListener(tripPath, 'mouseover', showTripMarkers);
+		google.maps.event.addListener(tripPath, 'mouseout', removeShownMarkers);
 			
 		// save trips in global space.
 		ngdtrips.push(tripPath);
