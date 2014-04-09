@@ -2,15 +2,20 @@
 google.maps.event.addDomListener( window, 'load', initialize );
 
 var map;
-var trips = [];
+var isGameDay = true;
+var gdtrips = [];
+var ngdtrips = [];
 var cntClick = 0;
-var clickLatLngs = [];
+var orgLatLngs = [];
+var dstLatLngs = [];
 var orgRegion = null;
 var drawOrgFlag = -1;
 var dstRegion = null;
 var drawDstFlag = -1;
 var shownTrips = [];
 var shownMarkers = [];
+
+var testVar = null;
 
 
 function initialize() {
@@ -25,58 +30,23 @@ function initialize() {
 }
 
 function setDayType() {
-	var data_selector, trip_selector, trip_color, daytype;
+	if (shownTrips.length > 0)
+		hideTrips();
 	
 	// set day type according to radio button
 	if ($('input:checked[name="daytype"]').val() == 'game')
 	{
-		data_selector = '#gd-data';
-		trip_selector = 'div.gd-trip';
-		trip_color = '#9370DB';
-		daytype = 'Game day';
+		isGameDay = true;
 	}
 	else if ( $('input:checked[name="daytype"]').val() == 'nongame')
 	{
-		data_selector = '#ngd-data';
-		trip_selector = 'div.ngd-trip';
-		trip_color = '#DC143C';
-		daytype = 'Non-game day';
+		isGameDay = false;
 	}
 	
-	var cnt = 0;
-	// find the trips of each day and save in global space.
-	$(data_selector).children(trip_selector).each( 
-		function (index, trip) {
-			var tripCoords = [];
-			// find the records of one trip
-			$(trip).children('p').each( 
-				function (ind, r ) {
-					lat = parseFloat( $(r).children('span.latitude').html() );
-					lon = parseFloat( $(r).children('span.longitude').html() );
-					var point = new google.maps.LatLng( lat, lon );
-					
-					tripCoords.push( point );
-				}
-			);
-			
-		
-			var tripPath = new google.maps.Polyline({
-				path: tripCoords,
-				geodesic: true,
-				strokeColor: trip_color,
-				strokeOpacity: 1.0,
-				strokeWeight: 2,
-				editable: true
-			});
-			
-			// save trips in global space.
-			trips.push(tripPath);
-
-			cnt++;
-		}
-	);
 	
-	message( 1, daytype + '\nTotal trips: ' + cnt);
+	// if two regions do not change, then plot the trips
+	if (orgRegion != null && dstRegion != null)
+		plotTrips();
 }
 
 
@@ -84,6 +54,7 @@ function setDayType() {
 function setOrg() {
 	drawOrgFlag = 0;
 	drawDstFlag = -1;
+	orgLatLngs = [];
 	if (orgRegion != null) 
 	{
 		orgRegion.setMap(null);
@@ -96,6 +67,7 @@ function setOrg() {
 function setDst() {
 	drawDstFlag = 0;
 	drawOrgFlag = -1;
+	dstLatLngs = [];
 	if (dstRegion != null)
 	{
 		dstRegion.setMap(null);
@@ -111,35 +83,33 @@ function mouseClick(event) {
 	// draw original region
 	if (drawOrgFlag == 0)
 	{
-		clickLatLngs.push( event.latLng );
+		orgLatLngs.push( event.latLng );
 		addMarker( event.latLng );
 		drawOrgFlag = 1;
 		message( 2, 'Please pinpoint the top right coner of origin region.' );
 	}
 	else if (drawOrgFlag == 1)
 	{
-		clickLatLngs.push( event.latLng );
-		orgRegion = drawRegion( clickLatLngs );
+		orgLatLngs.push( event.latLng );
+		orgRegion = drawRegion( orgLatLngs );
 		drawOrgFlag = 2;
-		clickLatLngs = [];
-		message( 2, 'Region selected.' );
+		message( 2, orgRegion.getBounds().toString() );
 	}
 	
 	// draw destination region
 	if (drawDstFlag == 0)
 	{
-		clickLatLngs.push( event.latLng );
+		dstLatLngs.push( event.latLng );
 		addMarker( event.latLng );
 		drawDstFlag = 1;
 		message( 2, 'Please pinpoint the top right coner of destination region.' );
 	}
 	else if (drawDstFlag == 1)
 	{
-		clickLatLngs.push( event.latLng );
-		dstRegion = drawRegion( clickLatLngs );
+		dstLatLngs.push( event.latLng );
+		dstRegion = drawRegion( dstLatLngs );
 		drawDstFlag = 2;
-		clickLatLngs = [];
-		message( 2, 'Region selected.' );
+		message( 2, dstRegion.getBounds().toString() );
 	}
 }
 
@@ -170,31 +140,31 @@ function drawRegion( latLngPair )
 	return rectangle;
 }
 
+//============== Trip plot function ===================
 
 function plotTrips()
-{	
+{
+	var trips = [];
+	if ( isGameDay )
+	{
+		trips = gdtrips;
+	}
+	else
+	{
+		trips = ngdtrips;
+	}
+	
 	cnt = 0;
 	for (i = 0; i < trips.length; i++)
 	{
 		var tripPath = trips[i];
-		var tripLength = tripPath.getPath().getLength();
-		var firstPoint = tripPath.getPath().getAt(0);
-		var lastPoint = tripPath.getPath().getAt( tripLength - 1 );
-		var firstBbox = orgRegion.getBounds();
-		var secondBbox = dstRegion.getBounds();
-		
-		if ( (firstBbox.contains(firstPoint) && secondBbox.contains(lastPoint)) 
-			|| (firstBbox.contains(lastPoint) && secondBbox.contains(firstPoint)) )
-		{
-			// plot the trip on Maps
-			tripPath.setMap( map );
-			google.maps.event.addListener(tripPath, 'mouseover', showTripMarkers);
-			google.maps.event.addListener(tripPath, 'mouseout', removeShownMarkers);
-			shownTrips.push(tripPath);
-			cnt ++;
-		}
+		// plot the trip on Maps
+		tripPath.setMap( map );
+		google.maps.event.addListener(tripPath, 'mouseover', showTripMarkers);
+		google.maps.event.addListener(tripPath, 'mouseout', removeShownMarkers);
+		shownTrips.push(tripPath);
+		cnt ++;
 	}
-	message(2, 'In total ' + cnt + ' trips are found.');
 	return cnt;
 }
 	
@@ -235,4 +205,79 @@ function hideTrips()
 function message( lineNo, content )
 {
 	$('#line' + lineNo).html( content )
+}
+
+
+
+function AJAXqueryTrips() {
+	// org and dst should have longitude before latitude
+	var queryData = {
+		org: [ 	[orgLatLngs[0].A, orgLatLngs[0].k],
+					[orgLatLngs[1].A, orgLatLngs[1].k]	],
+		dst: [	[dstLatLngs[0].A, dstLatLngs[0].k],
+					[dstLatLngs[1].A, dstLatLngs[1].k], 	]
+	};
+	message(2, "Query trips from server ... ");
+	return $.getJSON( "qtrips", JSON.stringify(queryData), function( data ) {
+		testVar = data;
+		// data is JSON format object, representing the coordinates of each trip
+		message(2, '#gameday trip: ' + data.gd.length + '; #non-game day trip: '
+				+ data.ngd.length);
+		// create google map objects from the JSON coordinates 
+		mapTrips( data );
+		// plot the google map PolyLine Objects on map
+		plotTrips();
+	});
+	
+}
+
+
+function mapTrips( queryRes ) {
+	gdtrips = [];
+	ngdtrips = [];
+	// map the game day trip into google map object
+	for (var i = 0; i < queryRes.gd.length; i++)
+	{
+		var googlePoints = [];
+		for (var j = 0; j < queryRes.gd[i].length; j++)
+		{
+			var p = new google.maps.LatLng( queryRes.gd[i][j][1], queryRes.gd[i][j][0] );
+			googlePoints.push(p);
+		}
+		
+		var tripPath = new google.maps.Polyline({
+			path: googlePoints,
+			geodesic: true,
+			strokeColor: '#9370DB',
+			strokeOpacity: 1.0,
+			strokeWeight: 2,
+			editable: true
+		});
+			
+		// save trips in global space.
+		gdtrips.push(tripPath);
+	}
+	
+	// map the non-game day trip into google map object
+	for (var i = 0; i < queryRes.ngd.length; i++)
+	{
+		var googlePoints = [];
+		for (var j = 0; j < queryRes.ngd[i].length; j++)
+		{
+			var p = new google.maps.LatLng( queryRes.ngd[i][j][1], queryRes.ngd[i][j][0] );
+			googlePoints.push(p);
+		}
+		
+		var tripPath = new google.maps.Polyline({
+			path: googlePoints,
+			geodesic: true,
+			strokeColor: '#DC143C',
+			strokeOpacity: 1.0,
+			strokeWeight: 2,
+			editable: true
+		});
+			
+		// save trips in global space.
+		ngdtrips.push(tripPath);
+	}
 }

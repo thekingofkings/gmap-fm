@@ -16,7 +16,7 @@ body { height: 100%; margin: 0; padding: 0 }
 #console {
 	position: absolute;
 	top: 5px;
-	margin-left: 40%;
+	margin-left: 60%;
 	z-index: 5;
 	background-color:#fff;
 	padding: 5px;
