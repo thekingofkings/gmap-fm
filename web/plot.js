@@ -93,7 +93,8 @@ function mouseClick(event) {
 		orgLatLngs.push( event.latLng );
 		orgRegion = drawRegion( orgLatLngs, "#008000" );
 		drawOrgFlag = 2;
-		message( "Origin selected." );
+		c = [[orgLatLngs[0].k, orgLatLngs[0].A], [orgLatLngs[1].k, orgLatLngs[1].A]];
+		message( "Origin selected:" + c);
 	}
 	
 	// draw destination region
@@ -109,7 +110,8 @@ function mouseClick(event) {
 		dstLatLngs.push( event.latLng );
 		dstRegion = drawRegion( dstLatLngs, "#800000");
 		drawDstFlag = 2;
-		message( "Destination selected." );
+		c = [[dstLatLngs[0].k, dstLatLngs[0].A], [dstLatLngs[1].k, dstLatLngs[1].A]];
+		message( "Destination selected:" + c );
 	}
 }
 
@@ -139,6 +141,69 @@ function drawRegion( latLngPair, color )
 	});
 	return rectangle;
 }
+
+function drawRegion_4coor( lat_l, lng_l, lat_r, lng_r )
+{
+	l = new google.maps.LatLng(lat_l, lng_l);
+	r = new google.maps.LatLng(lat_r, lng_r);
+	
+	var bbox = new google.maps.LatLngBounds( l, r );
+	var rect = new google.maps.Rectangle( {
+		strokeColor: '#00ee00',
+		strokeOpacity: 0.9,
+		strokeWeight: 2,
+		map: map,
+		bounds: bbox
+	});
+	return rect;
+}
+
+
+function drawRegion_bbox ( box )
+{
+	return drawRegion_4coor(box[0], box[1], box[2], box[3]);
+}
+
+
+function accessibility()
+{
+	var regions = [
+		[37.776752824049225, -122.39280223846436, 37.780806205952054, -122.38651514053345],
+		[37.780827405063945, -122.3927915096283, 37.78536811469731, -122.38640785217285],
+		[37.78084012452816, -122.3992395401001, 37.78528332342268, -122.39280223846436],
+		[37.77666802289111, -122.39947557449341, 37.780772287360435, -122.3928451538086], 
+		[37.77222430611356, -122.39966869354248, 37.7766510626478, -122.39286661148071],
+		[37.77220734485087, -122.39280223846436, 37.77663410240062, -122.38662242889404],
+		[37.78540203117992,-122.39282369613647,37.79038758480464,-122.38610744476318],
+		[37.78533419819913,-122.39928245544434,37.79018409940419,-122.39293098449707],
+		[37.785096782276035,-122.40679264068604,37.790116270812874,-122.39936828613281],
+		[37.78045005996349,-122.40679264068604,37.78496111569183,-122.39936828613281],
+		[37.77646449971476,-122.40700721740723,37.780382222437794,-122.39953994750977],
+		[37.77190204145678,-122.40780115127563,37.77660018189458,-122.39975452423096],
+		[37.76700005325191,-122.40786552429199,37.77180027337861,-122.39977598190308],
+		[37.767017015709065,-122.39964723587036,37.77215646103938,-122.39288806915283],
+		[37.766559028000074,-122.39275932312012,37.77219038358426,-122.38662242889404]
+	];
+	
+	var volume = [2278, 1522, 3339, 2487, 2027, 138, 1340, 3373, 10206, 4286, 2770, 2773, 2269, 1912, 113];
+	var accessibility = [2.91281425365526, 3.4091342560097, 2.32007320978184, 2.47634373054685, 2.02406171033392, 2.47069372336051, 2.43061871360756, 2.27592819010682, 2.35777016804431, 2.21572898947295, 2.08465278157694, 1.99405451303703, 1.93590176975279, 1.88941617723705, 1.88615055257702];
+	var avgSpeed = [7.01834832890339, 15.0366174063577, 14.7987995621722, 17.216423670516, 12.7600308114335, 9.14110517389241, 15.6324522623371, 15.1759237433249, 11.2996083667872, 13.5217670839451, 12.6552526733244, 17.8671382238788, 12.167594702068, 24.7355366902133, 34.3072980297847];
+	
+	for (var i = 0 ; i < regions.length; i++)
+	{
+		drawRegion_bbox( regions[i] );
+		var center = [ ( 1/ 5 * regions[i][0] + 4/ 5 * regions[i][2] ) , ( 4/5 * regions[i][1] + 1/5* regions[i][3] )];
+		var marker  = new MarkerWithLabel( {
+			position: new google.maps.LatLng( center[0], center[1] ),
+			map: map,
+			labelContent: "<p>V: " + volume[i] + "</p><p>A: " + accessibility[i].toFixed(2) + 
+					"</p><p>S: " + avgSpeed[i].toFixed(2) + "</p>",
+			labelClass: "markerLabel"
+		});
+	}
+	return regions;
+}	
+
 
 //============== Trip plot function ===================
 
