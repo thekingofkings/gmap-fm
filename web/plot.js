@@ -310,9 +310,37 @@ Assistant function for the C# project SFTaxi
 *********************************************************/
 
 
-function mapCoordinateToGrid( 
-
-
+function Grid( )
+{
+	var lowerLeft = [37.74027582404923, -122.51225523839999];
+	var upperRight = [37.81323020595205, -122.38651514053345];
+	var latStep = 0.004053;
+	var lngStep = 0.006287;
+	var widthN = 20;
+	var heightN = 18;
+	
+	for (var row = 0; row < heightN; row ++)
+	{
+		for (var column = 0; column < widthN; column ++)
+		{
+			bbox = [ lowerLeft[0] + latStep * (heightN - row -1), lowerLeft[1] + lngStep * column,
+					upperRight[0] - latStep * row, upperRight[1] - lngStep * (widthN - 1 - column)];
+			var grid = drawRegion_bbox( bbox );
+			grid.row = row;
+			grid.column = column;
+			grid.id = row * widthN + column;
+			
+			google.maps.event.addListener(grid, 'mouseover', function(event) {
+				message('Grid row ' + this.row + ' column ' + this.column + ' id ' + this.id);
+			});
+			google.maps.event.addListener(grid, 'mouseout', function(event) {
+				message('');
+			});
+		}
+	}
+}	
+	
+	
 function drawRegion_bbox ( box )
 {
 	return drawRegion_4coor(box[0], box[1], box[2], box[3]);
