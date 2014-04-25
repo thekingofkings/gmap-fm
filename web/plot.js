@@ -312,32 +312,55 @@ Assistant function for the C# project SFTaxi
 
 function Grid( )
 {
-	var lowerLeft = [37.74027582404923, -122.51225523839999];
-	var upperRight = [37.81323020595205, -122.38651514053345];
-	var latStep = 0.004053;
-	var lngStep = 0.006287;
-	var widthN = 20;
-	var heightN = 18;
+	this.lowerLeft = [37.74027582404923, -122.51225523839999];
+	this.upperRight = [37.81323020595205, -122.38651514053345];
+	this.latStep = 0.004053;
+	this.lngStep = 0.006287;
+	this.widthN = 20;
+	this.heightN = 18;
 	
-	for (var row = 0; row < heightN; row ++)
-	{
-		for (var column = 0; column < widthN; column ++)
+	this.plotGrid = function( bbox, row, column ) {
+		var grid = drawRegion_bbox( bbox );
+		grid.row = row;
+		grid.column = column;
+		grid.id = row * this.widthN + column;
+		
+		google.maps.event.addListener(grid, 'mouseover', function(event) {
+			message('Grid row ' + this.row + ' column ' + this.column + ' id ' + this.id);
+		});
+		
+		google.maps.event.addListener(grid, 'mouseout', function(event) {
+			message('');
+		});
+		
+		return grid;
+	};
+	
+	this.plotAllGrids= function() {
+		for (var row = 0; row < this.heightN; row ++)
 		{
-			bbox = [ lowerLeft[0] + latStep * (heightN - row -1), lowerLeft[1] + lngStep * column,
-					upperRight[0] - latStep * row, upperRight[1] - lngStep * (widthN - 1 - column)];
-			var grid = drawRegion_bbox( bbox );
-			grid.row = row;
-			grid.column = column;
-			grid.id = row * widthN + column;
-			
-			google.maps.event.addListener(grid, 'mouseover', function(event) {
-				message('Grid row ' + this.row + ' column ' + this.column + ' id ' + this.id);
-			});
-			google.maps.event.addListener(grid, 'mouseout', function(event) {
-				message('');
-			});
+			for (var column = 0; column < this.widthN; column ++)
+			{
+				bbox = [ this.lowerLeft[0] + this.latStep * (this.heightN - row -1), 
+						this.lowerLeft[1] + this.lngStep * column,
+						this.upperRight[0] - this.latStep * row, 
+						this.upperRight[1] - this.lngStep * (this.widthN - 1 - column)];
+				
+				this.plotGrid( bbox, row, column );
+			}
 		}
-	}
+	};
+	
+	
+	this.plotByID = function( id ) {
+		var row = Math.floor(id / this.widthN);
+		var column = id % this.widthN;
+		var bbox = [ this.lowerLeft[0] + this.latStep * (this.heightN - row -1), 
+						this.lowerLeft[1] + this.lngStep * column,
+						this.upperRight[0] - this.latStep * row, 
+						this.upperRight[1] - this.lngStep * (this.widthN - 1 - column)];
+		return this.plotGrid( bbox, row, column );
+	};
 }	
 	
 	
@@ -349,43 +372,44 @@ function drawRegion_bbox ( box )
 
 function accessibility()
 {
-	var regions = [
-		[37.776752824049225, -122.39280223846436, 37.780806205952054, -122.38651514053345],
-		[37.780827405063945, -122.3927915096283, 37.78536811469731, -122.38640785217285],
-		[37.78084012452816, -122.3992395401001, 37.78528332342268, -122.39280223846436],
-		[37.77666802289111, -122.39947557449341, 37.780772287360435, -122.3928451538086], 
-		[37.77222430611356, -122.39966869354248, 37.7766510626478, -122.39286661148071],
-		[37.77220734485087, -122.39280223846436, 37.77663410240062, -122.38662242889404],
-		[37.78540203117992,-122.39282369613647,37.79038758480464,-122.38610744476318],
-		[37.78533419819913,-122.39928245544434,37.79018409940419,-122.39293098449707],
-		[37.785096782276035,-122.40679264068604,37.790116270812874,-122.39936828613281],
-		[37.78045005996349,-122.40679264068604,37.78496111569183,-122.39936828613281],
-		[37.77646449971476,-122.40700721740723,37.780382222437794,-122.39953994750977],
-		[37.77190204145678,-122.40780115127563,37.77660018189458,-122.39975452423096],
-		[37.76700005325191,-122.40786552429199,37.77180027337861,-122.39977598190308],
-		[37.767017015709065,-122.39964723587036,37.77215646103938,-122.39288806915283],
-		[37.766559028000074,-122.39275932312012,37.77219038358426,-122.38662242889404]
-	];
+	var regions = [137, 138, 139, 157, 158, 159, 177, 178, 179, 197, 198, 199, 217, 218, 219];
 	
-	var volume = [2278, 1522, 3339, 2487, 2027, 138, 1340, 3373, 10206, 4286, 2770, 2773, 2269, 1912, 113];
-	var accessibility = [2.91281425365526, 3.4091342560097, 2.32007320978184, 2.47634373054685, 2.02406171033392, 2.47069372336051, 2.43061871360756, 2.27592819010682, 2.35777016804431, 2.21572898947295, 2.08465278157694, 1.99405451303703, 1.93590176975279, 1.88941617723705, 1.88615055257702];
-	var avgSpeed = [5.3072928250689, 8.64153316870664, 12.0253167834, 10.4190609723996, 12.2308283253516, 4.36639230134564, 13.2212038730488, 13.2250399552788, 9.04284095753427, 11.8916027983023, 11.7982580508872, 15.1719916998245, 11.0176034242057, 24.4041661777977, 33.0786451080843];
+	var v1 = [11826, 3700, 1623, 6014, 3657, 1406, 3495, 2857, 2033, 2515, 2680, 137, 912, 2352, 97];
+	var v2 = [10492, 3901, 1407, 4953, 4350, 2291, 3250, 3071, 3196, 2311, 2322, 151, 1057, 1846, 83];
 	
-	// var volume = [1617, 1228, 3186, 2625, 2410, 140, 1620, 3770, 11250, 5531, 3363, 3306, 2618, 2437, 148];
-	// var accessibility = [1.27852212689409, 1.27987158470929, 1.05847242219517, 1.8646917371858, 1.67847237022336, 1.67868371519076, 1.60357279398435, 1.73005827637748, 2.09464610013535, 2.07271016187855, 2.00869123676077, 2.02487513067521, 1.97506387517829, 1.89608584213208, 1.89559869135388];
-	// var avgSpeed = [6.80876247268019, 9.60894691290289, 12.544993920778, 11.9935877241595, 18.9857935119821, 5.00021148922158, 14.2922793811844, 11.7739623541239, 8.63945098454575, 9.80652951760842, 11.1170232377364, 15.2395942869394, 11.2756649206756, 47.6215216452615, 31.7848755904277];
+	var a1 = [13.0381577014044, 12.6096982082428, 12.9194285019246, 13.2175308750015, 12.8902845414743, 12.9915606176284, 13.5862235483038, 14.6938165680636, 14.6735667526119, 15.4972731769754, 16.4805210147651, 16.4801740275546, 16.4394525057699, 16.3285803773627, 16.3156156500416];
+	var a2 = [13.4894762377926, 12.3788521528668, 12.2124168985085, 14.2135102804244, 13.2301725812591, 16.2221395473468, 15.5366557272417, 16.186555124657, 16.4428194911355, 16.2006672638062, 16.5429368846066, 16.6074677181219, 16.5415244498326, 16.1980121417687, 16.179951584071];
+	
+	var s1 = [15.0256446662391, 18.4909268529557, 35.2882501507142, 16.9738181494622, 24.5596205844427, 23.3984486260933, 28.0131702468387, 25.8148290381372, 23.6249628771044, 25.8519467243805, 26.9357524138659, 26.5623532194627, 26.191256779436, 49.256115134887, 45.66392354355];
+	var s2 = [14.5447710679074, 24.4296700763784, 33.5107182091272, 18.4990154606122, 24.1224966867811, 17.8608294822235, 28.9617089765353, 21.5409437294058, 18.365432136799, 35.4262425637387, 20.9916674134994, 20.6822775181056, 25.5799442600732, 45.0332947989897, 25.7066752833852];
+		
+	
+	var ploter = new Grid();
 	
 	for (var i = 0 ; i < regions.length; i++)
 	{
-		drawRegion_bbox( regions[i] );
+		var grid = ploter.plotByID( regions[i] );
+		
+		grid.describ = "V: " + v1[i] + " A: " + a1[i].toFixed(2) + 
+					" S: " + s1[i].toFixed(2) + "<br>V: " + v2[i] + " A: " + 
+					a2[i].toFixed(2) + 	" S: " + s2[i].toFixed(2);
+					
+		google.maps.event.addListener(grid, 'mouseover', function(event) {
+			message( this.describ );
+		});
+		
+		
+		/* plot with labeled marker
 		var center = [ ( 1/ 5 * regions[i][0] + 4/ 5 * regions[i][2] ) , ( 4/5 * regions[i][1] + 1/5* regions[i][3] )];
 		var marker  = new MarkerWithLabel( {
 			position: new google.maps.LatLng( center[0], center[1] ),
 			map: map,
-			labelContent: "<p>V: " + volume[i] + "</p><p>A: " + accessibility[i].toFixed(2) + 
-					"</p><p>S: " + avgSpeed[i].toFixed(2) + "</p>",
+			labelContent: "<p>V: " + v1[i] + "</p><p>A: " + a1[i].toFixed(2) + 
+					"</p><p>S: " + s1[i].toFixed(2) + "</p>" + "<p>V: " + v2[i] + "</p><p>A: " + 
+					a2[i].toFixed(2) + 	"</p><p>S: " + s2[i].toFixed(2) + "</p>";
 			labelClass: "markerLabel"
 		});
+		*/
 	}
 	return regions;
 }
