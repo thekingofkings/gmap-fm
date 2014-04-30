@@ -314,10 +314,10 @@ function Grid( )
 {
 	this.lowerLeft = [37.74027582404923, -122.51225523839999];
 	this.upperRight = [37.81323020595205, -122.38651514053345];
-	this.latStep = 0.004053;
-	this.lngStep = 0.006287;
-	this.widthN = 20;
-	this.heightN = 18;
+	this.latStep = 0.004053 / 3;
+	this.lngStep = 0.006287 / 4;
+	this.widthN = (this.upperRight[1] - this.lowerLeft[1]) / this.lngStep;
+	this.heightN = (this.upperRight[0] - this.lowerLeft[0]) / this.latStep;
 	
 	this.plotGrid = function( bbox, row, column ) {
 		var grid = drawRegion_bbox( bbox );
@@ -413,3 +413,29 @@ function accessibility()
 	}
 	return regions;
 }
+
+
+function heatMapByHours() {
+	var hour = $('#hourTL').val();
+	var jfile = "data/ngdacc" + (hour - 10) + ".json";
+	message("");
+	
+	$.getJSON( jfile, function(json) {
+	
+		var gradient = {
+			0.1: "rgb(0,0,255)", 0.15: "rgb(0,255,255)", 0.3: "rgb(0,255,0)", 0.45: "yellow", 0.6: "rgb(255,0,0)" };
+			
+		var heatmap = new HeatmapOverlay( map, {
+			"radius": 30,
+			"visible": true,
+			"opacity": 100,
+			"gradient": gradient
+		});
+		google.maps.event.addListenerOnce(map, "idle", function(){
+			heatmap.setDataSet(json);
+		});
+		message("Plot heatmap finished");
+		
+	});
+}
+	

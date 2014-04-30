@@ -8,6 +8,8 @@
 		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAL-i8Ridf0tibzpzu-YsPR13sLIg5QbHA&libraries=drawing&sensor=false">
 		</script>
 		<script type="text/javascript" src="plot.js"></script>
+		<script type="text/javascript" src="heatmap-gmaps.js"></script>
+		<script type="text/javascript" src="heatmap.js"></script>
 		<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
 		<script type="text/javascript" src="markerwithlabel_packed.js"></script>
 	</head>
@@ -20,13 +22,23 @@
 			<form>
 			<input onclick="setDayType()" type=radio value="game" name="daytype" checked>Game Day</input>
 			<input onclick="setDayType()" type=radio value="nongame" name="daytype">Non-Game Day</input>
+			<select id="hourTL" onchange="heatMapByHours()">
+			<option value="10">10:00</option>
+			<option value="11">11:00</option>
+			<option value="12">12:00</option>
+			<option value="13">13:00</option>
+			<option value="14">14:00</option>
+			<option value="15">15:00</option>
+			<option value="16">16:00</option>
+			<option value="17">17:00</option>
+			<option value="18">18:00</option>
+			</select>
 			</form>
 		</div>
 		
 		<div id="console">
 			<p id="line"></p>
 		</div>
-			
 	
 		<div id="map-canvas"></div>
 	</body>
