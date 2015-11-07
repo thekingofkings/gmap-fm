@@ -81,36 +81,37 @@ function setDst() {
 	
 function mouseClick(event) {
 	// draw original region
+	p = { lat : event.latLng.lat(), lng : event.latLng.lng() };
 	if (drawOrgFlag == 0)
 	{
-		orgLatLngs.push( event.latLng );
-		addMarker( event.latLng );
+		orgLatLngs.push( p );
+		addMarker( p );
 		drawOrgFlag = 1;
 		message( 'Please pinpoint the top right coner of origin region.' );
 	}
 	else if (drawOrgFlag == 1)
 	{
-		orgLatLngs.push( event.latLng );
+		orgLatLngs.push( p );
 		orgRegion = drawRegion( orgLatLngs, "#008000" );
 		drawOrgFlag = 2;
-		c = [[orgLatLngs[0].k, orgLatLngs[0].A], [orgLatLngs[1].k, orgLatLngs[1].A]];
+		var c = [[orgLatLngs[0].lat, orgLatLngs[1].lng], [orgLatLngs[1].lat, orgLatLngs[1].lng]];
 		message( "Origin selected:" + c);
 	}
 	
 	// draw destination region
 	if (drawDstFlag == 0)
 	{
-		dstLatLngs.push( event.latLng );
-		addMarker( event.latLng );
+		dstLatLngs.push( p );
+		addMarker( p );
 		drawDstFlag = 1;
 		message( 'Please pinpoint the top right coner of destination region.' );
 	}
 	else if (drawDstFlag == 1)
 	{
-		dstLatLngs.push( event.latLng );
+		dstLatLngs.push( p );
 		dstRegion = drawRegion( dstLatLngs, "#800000");
 		drawDstFlag = 2;
-		c = [[dstLatLngs[0].k, dstLatLngs[0].A], [dstLatLngs[1].k, dstLatLngs[1].A]];
+		var c = [[dstLatLngs[0].lat, dstLatLngs[0].lng], [dstLatLngs[1].lat, dstLatLngs[1].lng]];
 		message( "Destination selected:" + c );
 	}
 }
@@ -228,10 +229,10 @@ function message( content )
 function AJAXqueryTrips() {
 	// org and dst should have longitude before latitude
 	var queryData = {
-		org: [ 	[orgLatLngs[0].A, orgLatLngs[0].k],
-					[orgLatLngs[1].A, orgLatLngs[1].k]	],
-		dst: [	[dstLatLngs[0].A, dstLatLngs[0].k],
-					[dstLatLngs[1].A, dstLatLngs[1].k], 	]
+		org: [ 	[orgLatLngs[0].lng, orgLatLngs[0].lat],
+					[orgLatLngs[1].lng, orgLatLngs[1].lat]	],
+		dst: [	[dstLatLngs[0].lng, dstLatLngs[0].lat],
+					[dstLatLngs[1].lng, dstLatLngs[1].lat], 	]
 	};
 	message("Query trips from server ... ");
 	return $.getJSON( "qtrips", JSON.stringify(queryData), function( data ) {

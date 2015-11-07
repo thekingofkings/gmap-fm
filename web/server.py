@@ -55,8 +55,8 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
     else:
-        port = 8000
-    server_address = ('jessieli-ubuntu.ist.psu.edu', port)
+        port = 8080
+    server_address = ('0.0.0.0', port)
     Server = BaseHTTPServer.HTTPServer    
     
     httpd = Server( server_address, Handler )
